@@ -1,0 +1,15 @@
+return {
+	cells = {
+		idle = {
+			{quad = 1, time = 0.1},
+			{quad = 2, time = 0.1},
+			{quad = 3, time = 0.075},
+			{quad = 2, time = 0.075, color = {255, 255, 255, 128}},
+			{quad = 1, time = 0.05, color = {255, 255, 255, 64}, next = "kill"}
+		}
+	},
+	gridX = 64,
+	gridY = 64,
+	offsetX = 32,
+	offsetY = 32
+}
