@@ -3,17 +3,26 @@
 	with doors in such a way that every room is accessible
 ]]--
 
+MAX_TILE = 16
+WALL_TYPE_WALL   = 0
+WALL_TYPE_THIN   = 1
+WALL_TYPE_WINDOW = 2
+
 function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 	local grid = {};
 	local head = nil;
-
+	local randomSeed = love.math.random(2000) 
+	-- local randomSeed = 176 
+	love.math.setRandomSeed(randomSeed)
+	print("Seed: "..randomSeed)
 	--helps provide more tuned random behavior for how many attempts to make each time a room is subdivided
-	local rand_cornersToPick = {1,2,3,3,4,4,4,5,5,5,5,6,6,6,7,7,8,8,8,9,10}
+	local rand_cornersToPick = {[0]=1,2,3,3,4,4,4,5,5,5,5,6,6,6,7,7,8,8,8,9,10}
 	local from = {};
 	local nodes = {};
 	local nodesByID = {};
-	local colors = {};
+	local tiles = {};
 	local startgindex = gindex;
+
 	function setup()
 		grid = {};
 		for i = initx, initx+globalWidth do
@@ -30,9 +39,10 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 		nodesByID = getEndNodesByID(nodes);
 		constructGraph();
 		buildDoors();
+		buildWalls();
 		local endNodes = getEndNodes(true);
 		local endNodesByID = getEndNodesByID(endNodes);
-		return {['gindex'] = gindex, ['nodes'] = endNodes, ['nodesByID'] = endNodesByID, ['grid'] = grid, ['colors'] = colors, ['x0'] = initx, ['y0'] = inity, ['width'] = globalWidth, ['height'] = globalHeight};
+		return {['gindex'] = gindex, ['nodes'] = endNodes, ['nodesByID'] = endNodesByID, ['grid'] = grid, ['tiles'] = tiles, ['x0'] = initx, ['y0'] = inity, ['width'] = globalWidth, ['height'] = globalHeight};
 	end
 
 	--gets only the nodes with actual active cells on the grid
@@ -76,6 +86,7 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 		NODE.children = {};
 		NODE.neighbors = {}; --for second pass to build into a graph. should contain booleans
 		NODE.neighborwalls = {};
+		NODE.wallTypes = {};
 		NODE.parent = parent;
 		NODE.x = x;
 		NODE.y = y;
@@ -121,19 +132,31 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 			end
 		end
 
-		--colors[id] = randomColor();
+		tiles[id] = rint(MAX_TILE);
 		--TODO: select tileset for the node
 		table.insert(nodes,NODE);
 		nodesByID[id] = NODE;
 		return NODE;
 	end
 
+	--Sets wall types; this can be used to make windows or thin walls that can be shot through
+	function buildWalls()
+		for k, node in pairs(nodes) do
+			print("Foo"..node.id)
+		end
+
+	end
 
 	function buildDoors()
 		from[grid[initx][inity]] = nil;
-		--local stack = [grid[initx][inity]];                                      --Static start position
+		-- local s_n = nil
+		-- while s_n == nil do
+		-- 	s_n = nodes[rint(table.getn(nodes))]
+		-- end
+		-- local stack = {s_n.id};                                --Random room
+		
+		local stack = {grid[initx][inity]};                                      --Static start position
 		--local stack = [grid[rint(globalWidth)+initx][rint(globalHeight)+inity]]; --Bias towards large rooms
-		local stack = {nodes[rint(table.getn(nodes))].id};                                --Random room
 		local explored = {grid[initx][inity]}; --ids
 		while table.getn(stack) > 0 do
 			local nodeID = table.remove(stack);
@@ -141,48 +164,51 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 			
 			--Determine which neighbors to attempt to explore
 			local choices = {};
-			for n, _ in ipairs(node.neighbors) do
+			for n, _ in pairs(node.neighbors) do
 				if (not explored[n]) then
 					table.insert(choices,n);
 				end
 			end
-			if (not choices.length == 0) then
+			if table.getn(choices) > 0 then
 				node.explored = true;
 				choices = shuffle(choices);
-
 				--Randomly explore choices
-				for c, _ in ipairs(choices) do
+				for c, _ in pairs(choices) do
 					local neighborID = choices[c];
 					local neighbor   = nodesByID[neighborID];
 					if (not node.doorsto[neighborID]) then
-						table.insert(node.doors, node.neighborwalls[neighborID][rint(node.neighborwalls[neighborID].length)]);
+						local doorIndex = rint(table.getn(node.neighborwalls[neighborID])-1)+1
+						-- print("Door options: "..table.getn(node.neighborwalls[neighborID]) .. ", door index: "..doorIndex .. ", result: ")
+						table.insert(node.doors, node.neighborwalls[neighborID][doorIndex]);
 						node.doorsto[neighborID] = true;
 						neighbor.doorsto[nodeID] = true;
 						
-						--print("Door from " + nodeID + " to " + neighborID);
+						-- print("Door from " .. nodeID .. " to " .. neighborID);
 					end
 					--Add all neighbors to stack in random order
-					--stack.push(neighborID);
-					stack.splice(rint(stack.length), 0, neighborID);
+					table.insert(stack, neighborID);
+					--stack.splice(rint(stack.length), 0, neighborID);
 					explored[neighborID] = true;
 					from[neighborID] = nodeID;
 				end
 
 				--Do some extra doors
-				local numExtra = rint(10)-7;
-				if (not numExtra <= 0) then
+				local numExtra = rint(20)-7;
+				if not (numExtra <= 0) then
 					local choices = {};
-					for n, _ in ipairs(node.neighbors) do
+					for n, _ in pairs(node.neighbors) do
 						table.insert(choices, n);
 					end
 					choices = shuffle(choices);
 					local limit = choices.length;
 					local i = 0;
-					while i < numExtra and i < choices.length do
+					while i < numExtra and i < table.getn(choices) do
 						i = i+1;
-						local neighborID = choices.pop();
+						local neighborID = table.remove(choices);
 						if (not node.doorsto[neighborID]) then
-							table.insert(node.doors, node.neighborwalls[neighborID][rint(node.neighborwalls[neighborID].length)]);
+							local doorIndex = rint(table.getn(node.neighborwalls[neighborID])-1)+1
+							table.insert(node.doors, node.neighborwalls[neighborID][doorIndex]);
+							print("Random Door!")
 						end
 					end
 				end
@@ -206,7 +232,7 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 					if (not nodesByID[ul].neighborwalls[ur]) then
 						nodesByID[ul].neighborwalls[ur] = {};
 					end
-					table.insert(nodesByID[ul].neighborwalls[ur], {['x'] = i  , ['y'] = j  , ['dx'] = i+1, ['dy'] = j  });
+					table.insert(nodesByID[ul].neighborwalls[ur], {['x'] = i  , ['y'] = j  , ['dx'] = i+1, ['dy'] = j  })
 
 					nodesByID[ur].neighbors[ul] = true;
 					if (not nodesByID[ur].neighborwalls[ul]) then
@@ -392,6 +418,3 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 	end
 	return setup();
 end
-
-
-generatePass1(1, 1, 20, 20, 0);

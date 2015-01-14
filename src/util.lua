@@ -46,13 +46,21 @@ end
 function shuffle(o)
     local j
     local x
-    local i = o.length
+    local i = table.getn(o)
     while i > 0 do
-    	j = math.floor(love.math.random() * i)
+    	j = rint(i)
     	i = i-1
     	x = o[i]
     	o[i] = o[j]
     	o[j] = x
     end
     return o;
+end
+
+function push(a, obj)
+	if table.getn(a) == 0 then
+		a[0] = obj
+	else
+		table.insert(a, obj)
+	end
 end

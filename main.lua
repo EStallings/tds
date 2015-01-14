@@ -37,7 +37,7 @@ function love.draw()
 	if SUSPEND then
 		SUSPEND.draw()
 	end
-	love.graphics.setColor(240, 10, 10, 255)
-	love.graphics.setNewFont(RussianFont, 32)
+	-- love.graphics.setColor(240, 10, 10, 255)
+	-- love.graphics.setNewFont(RussianFont, 32)
 	--debug drawing
 end
