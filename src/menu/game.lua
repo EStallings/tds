@@ -9,7 +9,7 @@ function modeGame.load(args)
 	level = SetupLevel(world)
 	love.mouse.setVisible(false)
 	love.mouse.setGrabbed(true)
-	-- love.window.setMode(1920,1080,{borderless=true})
+	love.window.setMode(1920,1080,{borderless=true})
 end
 
 function modeGame.update(dt)
@@ -33,7 +33,8 @@ function drawWorld()
 
 	-- love.graphics.setColor(120,120,120)
 	love.graphics.circle('fill', player.body:getX(), player.body:getY(), 32)
-
+	love.graphics.rectangle('fill', 0, 0, 64, 64)
+	love.graphics.rectangle('fill', 100, 100, 128, 128)
 	player:draw()
 end
 

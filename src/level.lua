@@ -1,17 +1,18 @@
 function SetupLevel(world)
 	local level = {}
-	level.data = generatePass1(0, 0, 20, 20, 0)
+	level.data = generatePass1(0, 0, 15, 15, 0)
 	level.updated = true
 	level.canvas = love.graphics.newCanvas(levelPxWidth, levelPxHeight)
 	
 	return level
 end
 
-cellsize = 20;
+cellsize = 128;
+-- cellsize = ; --for testing
 hcs = cellsize/2;
 doorsize = 20
-levelPxWidth  = 2048
-levelPxHeight = 2048
+levelPxWidth  = 4096
+levelPxHeight = 4096
 xOffset = levelPxWidth/2
 yOffset = levelPxHeight/2
 

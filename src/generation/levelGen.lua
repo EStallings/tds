@@ -16,12 +16,14 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 	love.math.setRandomSeed(randomSeed)
 	print("Seed: "..randomSeed)
 	--helps provide more tuned random behavior for how many attempts to make each time a room is subdivided
-	local rand_cornersToPick = {[0]=1,2,3,3,4,4,4,5,5,5,5,6,6,6,7,7,8,8,8,9,10}
+	local rand_cornersToPick = {[0]=2,3,3,4,4,4,5,5,5,5,6,6,6,6,6,7,7,7,7,8,8,8,9,9,10,10}
+	local rand_roomDeltas = {[0]=0.999}
 	local from = {};
 	local nodes = {};
 	local nodesByID = {};
 	local tiles = {};
 	local startgindex = gindex;
+	local roomSizeDelta = rand_roomDeltas[rint(table.getn(rand_roomDeltas))]
 
 	function setup()
 		grid = {};
@@ -141,8 +143,42 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 
 	--Sets wall types; this can be used to make windows or thin walls that can be shot through
 	function buildWalls()
-		for k, node in pairs(nodes) do
-			print("Foo"..node.id)
+		for i, node in pairs(nodes) do
+			for j, neighborID in pairs(node.neighbors) do
+				-- TODO... This might be more in-depth than initially thought
+
+				--[[
+					Walls need to not only have different types, but different patterns.
+					Currently, I can only think of three types of walls: Wall, Window, and Thin Wall. It might be desirable to
+					have more types to allow for different bullet penetration/visibility/light effects, so this should be kept
+					generalized.
+
+					Patterns are also a concern. My current inclination is to pick a "WALL TYPE" - Wall, Thin Wall, etc and then
+					select a random pattern to use, like:
+
+					Wall-Wall-Window-Wall-Wall-Window-Wall-Wall
+
+					that will repeat itself. This way even spacing of windows or other "special wall types" can be repeated. Also,
+					it should sometimes (with some configurable probability) pick no pattern at all for window placement.
+
+					Also, Walls and Windows need textures. My current thought is that the heirarchy will look something like this:
+
+					Tileset -- this is the top-level aesthetic. There might be a 80s tileset, a grunge tileset, whatever. This is the style of the LEVEL
+						Roomset -- this is the set chosen for the room being decorated, chosen at random. Each roomset contains its own art, and each
+									roomset can draw from the "All" roomset in the tileset
+							Walls
+								Wall_1 { type=wall/thinwall/thickwall/etc/etc }
+								...
+							Windows
+								Window_1 { type=window/etc/etc }
+								...
+							Floors
+								Floor_1
+								...
+							Decor
+							...
+				]]--
+			end
 		end
 
 	end
@@ -346,14 +382,16 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 
 		--Randomly return based on size
 		local area = width*height
-		if (love.math.random() < 40/area) then
+		local ratio = (math.sqrt(area)/(math.sqrt(globalWidth*globalHeight)*roomSizeDelta))
+		if (love.math.random() > ratio) then
+			print("Returning randomly! p="..(ratio))
 			return;
 		end
 
 		-- print("new parent node!")
 		--Determine how many corners to do
 		local numTries = rand_cornersToPick[rint(table.getn(rand_cornersToPick))];
-
+		print("Numtries = "..numTries)
 		for n = 0, numTries do
 
 			--Determine a corner to start

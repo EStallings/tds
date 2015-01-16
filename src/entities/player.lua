@@ -9,7 +9,7 @@ function SetupPlayer(x, y)
 	player.rotation = 0
 
 	function player:update(dt)
-		local speed = 400
+		local speed = 800
 		local vx, vy = 0, 0
 		vy = vy - getControlStatus('move_up')
 		vy = vy + getControlStatus('move_down')
