@@ -4,6 +4,50 @@
 		"selected_items":
 		[
 			[
+				"door",
+				"doorStopFixture"
+			],
+			[
+				"doorStop",
+				"doorStopShape"
+			],
+			[
+				"offS",
+				"offsetX"
+			],
+			[
+				"off",
+				"offsetY"
+			],
+			[
+				"wall",
+				"wallthickness"
+			],
+			[
+				"draw",
+				"DrawLevel"
+			],
+			[
+				"BuilLeve",
+				"BuildLevelPhysics"
+			],
+			[
+				"nodes",
+				"nodesByID"
+			],
+			[
+				"neih",
+				"neighborWall"
+			],
+			[
+				"neighbor",
+				"neighborWall"
+			],
+			[
+				"neibh",
+				"neighborID"
+			],
+			[
 				"room",
 				"roomSizeDelta"
 			],
@@ -18,10 +62,6 @@
 			[
 				"neighbo",
 				"neighbors"
-			],
-			[
-				"door",
-				"doorIndex"
 			],
 			[
 				"cell",
@@ -56,14 +96,6 @@
 				"offsetX"
 			],
 			[
-				"off",
-				"offsetY"
-			],
-			[
-				"draw",
-				"drawX"
-			],
-			[
 				"y",
 				"y"
 			],
@@ -88,26 +120,18 @@
 	"buffers":
 	[
 		{
-			"file": "src/level.lua",
-			"settings":
-			{
-				"buffer_size": 2400,
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "src/generation/levelGen.lua",
 			"settings":
 			{
-				"buffer_size": 14263,
+				"buffer_size": 16557,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "src/util.lua",
+			"file": "src/level.lua",
 			"settings":
 			{
-				"buffer_size": 1185,
+				"buffer_size": 8446,
 				"line_ending": "Windows"
 			}
 		},
@@ -115,7 +139,23 @@
 			"file": "src/menu/game.lua",
 			"settings":
 			{
-				"buffer_size": 1249,
+				"buffer_size": 2785,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/globals.lua",
+			"settings":
+			{
+				"buffer_size": 226,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/util.lua",
+			"settings":
+			{
+				"buffer_size": 2368,
 				"line_ending": "Windows"
 			}
 		},
@@ -123,7 +163,7 @@
 			"file": "src/entities/player.lua",
 			"settings":
 			{
-				"buffer_size": 1088,
+				"buffer_size": 1126,
 				"line_ending": "Windows"
 			}
 		},
@@ -139,7 +179,7 @@
 			"file": "main.lua",
 			"settings":
 			{
-				"buffer_size": 703,
+				"buffer_size": 717,
 				"line_ending": "Windows"
 			}
 		}
@@ -179,10 +219,12 @@
 	],
 	"file_history":
 	[
-		"/E/Users/Ezra/dev/tds/src/generation/levelGen.lua",
-		"/E/Users/Ezra/dev/tds/require.lua",
-		"/E/Users/Ezra/dev/tds/main.lua",
+		"/E/Users/Ezra/dev/tds/src/menu/game.lua",
 		"/E/Users/Ezra/dev/tds/src/level.lua",
+		"/E/Users/Ezra/dev/tds/src/assetLoader.lua",
+		"/E/Users/Ezra/dev/tds/require.lua",
+		"/E/Users/Ezra/dev/tds/src/generation/levelGen.lua",
+		"/E/Users/Ezra/dev/tds/main.lua",
 		"/E/Users/Ezra/dev/tds/src/entity.lua",
 		"/E/Users/Ezra/dev/tds/src/entities/bullet.lua",
 		"/E/Users/Ezra/dev/topdown/src/game.lua",
@@ -248,6 +290,55 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"walls",
+			"else",
+			"wallthickness",
+			"y0",
+			"x0",
+			"block1",
+			"objects.",
+			"objects",
+			"else",
+			"level.shapes",
+			"level.fixtures",
+			"level.body",
+			"and not",
+			"wallMap",
+			"door.",
+			"door",
+			"finalWalls",
+			",",
+			" ",
+			"  ",
+			"Columns 6 through 9",
+			"Columns 1 through 5",
+			"offsetX",
+			"scale",
+			"cellsize-hcs",
+			"fixtures",
+			"love.graphics.line",
+			"print",
+			"BuildLevelFromData",
+			"d90",
+			"local n1",
+			"nodesByID[grid[i][j]].defaultWall",
+			"['rot'] =",
+			",[",
+			"['type']",
+			"})",
+			"['type']",
+			"})",
+			"f3",
+			"F3",
+			"F2",
+			"f2",
+			"F2",
+			"F1",
+			"f1",
+			"F1",
+			"Assets",
+			"ASSETS",
+			"print",
 			"Math",
 			"15",
 			"Math",
@@ -326,15 +417,17 @@
 			"0",
 			"d",
 			"c",
-			"initShapes",
-			"gameShapeCount"
+			"initShapes"
 		],
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": false,
+		"regex": true,
 		"replace_history":
 		[
+			"\\n",
+			"",
+			" "
 		],
 		"reverse": false,
 		"show_context": true,
@@ -345,53 +438,24 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "src/level.lua",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2400,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								213,
-								213
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Lua/Lua.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
 					"file": "src/generation/levelGen.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 14263,
+						"buffer_size": 16557,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								697,
-								697
+								7171,
+								7171
 							]
 						],
 						"settings":
@@ -400,27 +464,113 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2592.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "src/util.lua",
+					"buffer": 1,
+					"file": "src/level.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1185,
+						"buffer_size": 8446,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1134,
-								1134
+								1998,
+								1998
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 488.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/menu/game.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2785,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2629,
+								2629
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 864.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/globals.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 226,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								226,
+								226
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/util.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2368,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1448,
+								1266
 							]
 						],
 						"settings":
@@ -435,12 +585,12 @@
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "src/menu/game.lua",
+					"buffer": 5,
+					"file": "src/entities/player.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1249,
+						"buffer_size": 1126,
 						"regions":
 						{
 						},
@@ -460,40 +610,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "src/entities/player.lua",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1088,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								394,
-								394
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Lua/Lua.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
+					"buffer": 6,
 					"file": "src/controls.lua",
 					"semi_transient": false,
 					"settings":
@@ -518,24 +639,24 @@
 						"translation.y": 102.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 7,
 					"file": "main.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 703,
+						"buffer_size": 717,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								676,
-								676
+								364,
+								364
 							]
 						],
 						"settings":
@@ -547,7 +668,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 3,
 					"type": "text"
 				}
 			]
@@ -586,7 +707,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 100.0
+		"height": 196.0
 	},
 	"output.find_results":
 	{
@@ -595,7 +716,7 @@
 	"project": "topdown.sublime-project",
 	"replace":
 	{
-		"height": 42.0
+		"height": 62.0
 	},
 	"save_all_on_build": true,
 	"select_file":

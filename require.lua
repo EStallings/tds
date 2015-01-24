@@ -8,6 +8,8 @@ cache  = require 'lib/cache'
 
 --source
 require 'src/util'
+require 'src/globals'
+require 'src/assetLoader'
 require 'src/generation/levelGen'
 require 'src/level'
 require 'src/sprite'

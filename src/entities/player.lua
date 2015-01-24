@@ -5,6 +5,7 @@ function SetupPlayer(x, y)
 	player.body:setFixedRotation(true)
 	player.shape = love.physics.newCircleShape(32)
 	player.fixture = love.physics.newFixture(player.body, player.shape)
+	player.fixture:setUserData("Player")
 	player.sprite = Sprite("player")
 	player.rotation = 0
 

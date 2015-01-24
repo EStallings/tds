@@ -23,8 +23,14 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 	local nodesByID = {};
 	local tiles = {};
 	local startgindex = gindex;
-	local roomSizeDelta = rand_roomDeltas[rint(table.getn(rand_roomDeltas))]
+	local doorMap = {}
 
+	--SECTION
+	--These variables MIGHT be better to pass in, but currently I'm doing it randomly.
+	local roomSizeDelta = rand_roomDeltas[rint(table.getn(rand_roomDeltas))]
+	local tileset = table.randFrom(assets.tilesets)
+
+	--END SECTION
 	function setup()
 		grid = {};
 		for i = initx, initx+globalWidth do
@@ -42,9 +48,10 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 		constructGraph();
 		buildDoors();
 		buildWalls();
+		buildFloors();
 		local endNodes = getEndNodes(true);
 		local endNodesByID = getEndNodesByID(endNodes);
-		return {['gindex'] = gindex, ['nodes'] = endNodes, ['nodesByID'] = endNodesByID, ['grid'] = grid, ['tiles'] = tiles, ['x0'] = initx, ['y0'] = inity, ['width'] = globalWidth, ['height'] = globalHeight};
+		return {['gindex'] = gindex, ['nodes'] = endNodes, ['doorMap'] = doorMap, ['nodesByID'] = endNodesByID, ['grid'] = grid, ['tiles'] = tiles, ['x0'] = initx, ['y0'] = inity, ['width'] = globalWidth, ['height'] = globalHeight};
 	end
 
 	--gets only the nodes with actual active cells on the grid
@@ -97,9 +104,12 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 		NODE.id = id;
 		NODE.success = true;
 		NODE.explored = false;
+		NODE.floor = nil;
 		NODE.doors = {};
 		NODE.doorsto = {};
 		NODE.area = _width*_height;
+		NODE.roomset = table.randFrom(tileset); --TODO this might not be best truly random!
+		NODE.defaultWall = NODE.roomset.walls['wall1.png']
 		NODE.corners = {
 			[0]={['x'] = x,        ['y'] = y,           ['ix'] = 1,  ['iy'] = 1,  ['lw'] = _width, ['lh'] = _height},
 			{['x'] = x,        ['y'] = y+_height,   ['ix'] = 1,  ['iy'] = -1, ['lw'] = _width, ['lh'] = _height},
@@ -118,7 +128,7 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 			for i = x, _width do
 				for j = y, _height do
 					if (grid[i][j] ~= startgindex and grid[i][j] ~= parent.id) then
-						NODE.success = false;
+						NODE.success = false
 						-- print("[Rejected!] =  " )
 						return
 					end
@@ -141,10 +151,16 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 		return NODE;
 	end
 
+	function buildFloors()
+		for i, node in pairs(nodes) do
+			node.floor = table.randFrom(node.roomset.floors)
+		end
+	end
+
 	--Sets wall types; this can be used to make windows or thin walls that can be shot through
 	function buildWalls()
 		for i, node in pairs(nodes) do
-			for j, neighborID in pairs(node.neighbors) do
+			for neighborID, _ in pairs(node.neighbors) do
 				-- TODO... This might be more in-depth than initially thought
 
 				--[[
@@ -178,9 +194,24 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 							Decor
 							...
 				]]--
+
+				--TODO FOR NOW I am just setting all walls to wall1
+				for _, neighborWall in pairs(node.neighborwalls[neighborID]) do
+					neighborWall.type = "wall1.png"
+					neighborWall.image = node.roomset.walls[neighborWall.type]
+				end
 			end
 		end
 
+
+
+	end
+
+	function addToDoorMap(x0, y0, x1, y1)
+		if not doorMap[x0]         then doorMap[x0] = {} end
+		if not doorMap[x0][y0]     then doorMap[x0][y0] = {} end
+		if not doorMap[x0][y0][x1] then doorMap[x0][y0][x1] = {} end
+		                                doorMap[x0][y0][x1][y1] = {true}
 	end
 
 	function buildDoors()
@@ -189,14 +220,14 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 		-- while s_n == nil do
 		-- 	s_n = nodes[rint(table.getn(nodes))]
 		-- end
-		-- local stack = {s_n.id};                                --Random room
+		-- local stack = {s_n.id}                                --Random room
 		
-		local stack = {grid[initx][inity]};                                      --Static start position
-		--local stack = [grid[rint(globalWidth)+initx][rint(globalHeight)+inity]]; --Bias towards large rooms
-		local explored = {grid[initx][inity]}; --ids
+		local stack = {grid[initx][inity]}                                      --Static start position
+		--local stack = [grid[rint(globalWidth)+initx][rint(globalHeight)+inity]] --Bias towards large rooms
+		local explored = {grid[initx][inity]} --ids
 		while table.getn(stack) > 0 do
-			local nodeID = table.remove(stack);
-			local node = nodesByID[nodeID];
+			local nodeID = table.remove(stack)
+			local node = nodesByID[nodeID]
 			
 			--Determine which neighbors to attempt to explore
 			local choices = {};
@@ -215,10 +246,12 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 					if (not node.doorsto[neighborID]) then
 						local doorIndex = rint(table.getn(node.neighborwalls[neighborID])-1)+1
 						-- print("Door options: "..table.getn(node.neighborwalls[neighborID]) .. ", door index: "..doorIndex .. ", result: ")
-						table.insert(node.doors, node.neighborwalls[neighborID][doorIndex]);
-						node.doorsto[neighborID] = true;
-						neighbor.doorsto[nodeID] = true;
-						
+						table.insert(node.doors, node.neighborwalls[neighborID][doorIndex])
+						node.doorsto[neighborID] = true
+						neighbor.doorsto[nodeID] = true
+						local door = node.neighborwalls[neighborID][doorIndex]
+						addToDoorMap(door.x, door.y, door.dx, door.dy)
+						addToDoorMap(door.dx, door.dy, door.x, door.y)
 						-- print("Door from " .. nodeID .. " to " .. neighborID);
 					end
 					--Add all neighbors to stack in random order
@@ -244,7 +277,10 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 						if (not node.doorsto[neighborID]) then
 							local doorIndex = rint(table.getn(node.neighborwalls[neighborID])-1)+1
 							table.insert(node.doors, node.neighborwalls[neighborID][doorIndex]);
-							print("Random Door!")
+							local door = node.neighborwalls[neighborID][doorIndex]
+							addToDoorMap(door.x, door.y, door.dx, door.dy)
+							addToDoorMap(door.dx, door.dy, door.x, door.y)
+							-- print("Random Door!")
 						end
 					end
 				end
@@ -256,71 +292,79 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 
 	function constructGraph()
 		--do scan in 2x2 chunks
-		for i = initx, initx+globalWidth-1 do
-			for j = inity, inity+globalHeight-1 do
+		local check = {}
+		for i = initx, initx+globalWidth do
+			for j = inity, inity+globalHeight do
+
 				local ul = grid[i  ][j  ];
-				local ur = grid[i+1][j  ];
 				local ll = grid[i  ][j+1];
-				local lr = grid[i+1][j+1];
+				
+				if grid[i+1] ~= nil then
+					local ur = grid[i+1][j  ];
+					local lr = grid[i+1][j+1];
+					if (ul ~= ur) then
+						nodesByID[ul].neighbors[ur] = true;
+						if (not nodesByID[ul].neighborwalls[ur]) then
+							nodesByID[ul].neighborwalls[ur] = {};
+						end
+						table.insert(nodesByID[ul].neighborwalls[ur], {['x'] = i  , ['y'] = j  , ['dx'] = i+1, ['dy'] = j  , ['drawX'] = (i+1)*cellsize-wallthickness, ['drawY'] = j*cellsize, ['rot'] = 0, ['type'] = nil})
 
-				if (ul ~= ur) then
-					nodesByID[ul].neighbors[ur] = true;
-					if (not nodesByID[ul].neighborwalls[ur]) then
-						nodesByID[ul].neighborwalls[ur] = {};
-					end
-					table.insert(nodesByID[ul].neighborwalls[ur], {['x'] = i  , ['y'] = j  , ['dx'] = i+1, ['dy'] = j  })
+						nodesByID[ur].neighbors[ul] = true;
+						if (not nodesByID[ur].neighborwalls[ul]) then
+							nodesByID[ur].neighborwalls[ul] = {};
+						end
+						table.insert(nodesByID[ur].neighborwalls[ul], {['x'] = i+1, ['y'] = j  , ['dx'] = i  , ['dy'] = j  , ['drawX'] = (i+1)*cellsize, ['drawY'] = j*cellsize, ['rot'] = 0, ['type'] = nil});
 
-					nodesByID[ur].neighbors[ul] = true;
-					if (not nodesByID[ur].neighborwalls[ul]) then
-						nodesByID[ur].neighborwalls[ul] = {};
 					end
-					table.insert(nodesByID[ur].neighborwalls[ul], {['x'] = i+1, ['y'] = j  , ['dx'] = i  , ['dy'] = j  });
+				end
+				if ll ~= nil then
+					
+					if (ul ~= ll) then
+						nodesByID[ul].neighbors[ll] = true;
+						if (not nodesByID[ul].neighborwalls[ll]) then
+							nodesByID[ul].neighborwalls[ll] = {};
+						end
+						table.insert(nodesByID[ul].neighborwalls[ll], {['x'] = i  , ['y'] = j  , ['dx'] = i  , ['dy'] = j+1, ['drawX'] = i*cellsize, ['drawY'] = (j+1)*cellsize, ['rot'] = -d90, ['type'] = nil});
+
+						nodesByID[ll].neighbors[ul] = true;
+						if (not nodesByID[ll].neighborwalls[ul]) then
+							nodesByID[ll].neighborwalls[ul] = {};
+						end
+						table.insert(nodesByID[ll].neighborwalls[ul], {['x'] = i  , ['y'] = j+1, ['dx'] = i  , ['dy'] = j  , ['drawX'] = i*cellsize, ['drawY'] = (j+1)*cellsize+wallthickness, ['rot'] = -d90, ['type'] = nil});
+
+					end
+					if (ul ~= lr)then end
+					if (ur ~= ll)then end
+					-- if (ur ~= lr) then
+					-- 	nodesByID[ur].neighbors[lr] = true;
+					-- 	if (not nodesByID[ur].neighborwalls[lr]) then
+					-- 		nodesByID[ur].neighborwalls[lr] = {};
+					-- 	end
+					-- 	table.insert(nodesByID[ur].neighborwalls[lr], {['x'] = i+1, ['y'] = j  , ['dx'] = i+1, ['dy'] = j+1, ['drawX'] = (i+1)*cellsize, ['drawY'] = (j+1)*cellsize-wallthickness, ['rot'] = -d90, ['type'] = nil});
+
+					-- 	nodesByID[lr].neighbors[ur] = true;
+					-- 	if (not nodesByID[lr].neighborwalls[ur]) then
+					-- 		nodesByID[lr].neighborwalls[ur] = {};
+					-- 	end
+					-- 	table.insert(nodesByID[lr].neighborwalls[ur], {['x'] = i+1, ['y'] = j+1, ['dx'] = i+1, ['dy'] = j  , ['drawX'] = (i+1)*cellsize, ['drawY'] = (j+1)*cellsize, ['rot'] = -d90, ['type'] = nil});
+
+					-- end
 
 				end
-				if (ul ~= ll) then
-					nodesByID[ul].neighbors[ll] = true;
-					if (not nodesByID[ul].neighborwalls[ll]) then
-						nodesByID[ul].neighborwalls[ll] = {};
-					end
-					table.insert(nodesByID[ul].neighborwalls[ll], {['x'] = i  , ['y'] = j  , ['dx'] = i  , ['dy'] = j+1});
+				-- if (lr ~= ll) then
+				-- 	nodesByID[lr].neighbors[ll] = true;
+				-- 	if (not nodesByID[lr].neighborwalls[ll]) then
+				-- 		nodesByID[lr].neighborwalls[ll] = {};
+				-- 	end
+				-- 	table.insert(nodesByID[lr].neighborwalls[ll], {['x'] = i+1, ['y'] = j+1, ['dx'] = i  , ['dy'] = j+1, ['drawX'] = (i+1)*cellsize-wallthickness, ['drawY'] = (j+1)*cellsize, ['rot'] = 0, ['type'] = nil});
 
-					nodesByID[ll].neighbors[ul] = true;
-					if (not nodesByID[ll].neighborwalls[ul]) then
-						nodesByID[ll].neighborwalls[ul] = {};
-					end
-					table.insert(nodesByID[ll].neighborwalls[ul], {['x'] = i  , ['y'] = j+1, ['dx'] = i  , ['dy'] = j  });
+				-- 	nodesByID[ll].neighbors[lr] = true;
+				-- 	if (not nodesByID[ll].neighborwalls[lr]) then
+				-- 		nodesByID[ll].neighborwalls[lr] = {};
+				-- 	end
+				-- 	table.insert(nodesByID[ll].neighborwalls[lr], {['x'] = i  , ['y'] = j+1, ['dx'] = i+1, ['dy'] = j+1, ['drawX'] = (i+1)*cellsize, ['drawY'] = (j+1)*cellsize, ['rot'] = 0, ['type'] = nil});
 
-				end
-				if (ul ~= lr)then end
-				if (ur ~= ll)then end
-				if (ur ~= lr) then
-					nodesByID[ur].neighbors[lr] = true;
-					if (not nodesByID[ur].neighborwalls[lr]) then
-						nodesByID[ur].neighborwalls[lr] = {};
-					end
-					table.insert(nodesByID[ur].neighborwalls[lr], {['x'] = i+1, ['y'] = j  , ['dx'] = i+1, ['dy'] = j+1});
-
-					nodesByID[lr].neighbors[ur] = true;
-					if (not nodesByID[lr].neighborwalls[ur]) then
-						nodesByID[lr].neighborwalls[ur] = {};
-					end
-					table.insert(nodesByID[lr].neighborwalls[ur], {['x'] = i+1, ['y'] = j+1, ['dx'] = i+1, ['dy'] = j  });
-
-				end
-				if (lr ~= ll) then
-					nodesByID[lr].neighbors[ll] = true;
-					if (not nodesByID[lr].neighborwalls[ll]) then
-						nodesByID[lr].neighborwalls[ll] = {};
-					end
-					table.insert(nodesByID[lr].neighborwalls[ll], {['x'] = i+1, ['y'] = j+1,['dx'] = i  , ['dy'] = j+1});
-
-					nodesByID[ll].neighbors[lr] = true;
-					if (not nodesByID[ll].neighborwalls[lr]) then
-						nodesByID[ll].neighborwalls[lr] = {};
-					end
-					table.insert(nodesByID[ll].neighborwalls[lr], {['x'] = i  , ['y'] = j+1,['dx'] = i+1, ['dy'] = j+1});
-
-				end
+				-- end
 			end
 		end
 	end
@@ -384,14 +428,14 @@ function generatePass1(initx, inity, globalWidth, globalHeight, gindex)
 		local area = width*height
 		local ratio = (math.sqrt(area)/(math.sqrt(globalWidth*globalHeight)*roomSizeDelta))
 		if (love.math.random() > ratio) then
-			print("Returning randomly! p="..(ratio))
+			-- print("Returning randomly! p="..(ratio))
 			return;
 		end
 
 		-- print("new parent node!")
 		--Determine how many corners to do
 		local numTries = rand_cornersToPick[rint(table.getn(rand_cornersToPick))];
-		print("Numtries = "..numTries)
+		-- print("Numtries = "..numTries)
 		for n = 0, numTries do
 
 			--Determine a corner to start

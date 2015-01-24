@@ -17,6 +17,7 @@ function endSuspend()
 end
 
 function love.load()
+	loadAssets()
 	initControls()
 	if MODE.load then MODE.load() end
 end
